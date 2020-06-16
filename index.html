@@ -1,0 +1,210 @@
+<!DOCTYPE html> <!--Sagt dem Browser, dass es sich um ein html Dokument handelt.-->
+<html lang="de"> <!-- Setzt Deutsch als die Sprache-->
+    <head>
+        <meta charset="UTF-8"> <!--Erlaubt auch emojis im Text usw.-->
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!-- <script src="../css/html5.js"></script> Zeigt den link zum Javascript, wird hier nicht benötigt. -->
+
+
+        <title>Testen Sie Ihre Reaktion!</title>
+        <!--Hier kannst Du zum Beispiel die Beschreibung, Stichwörter, robots weg lassen. Wie Du magst.-->
+        <meta name="description" content="Testen Sie Ihr Reaktionsgeschwindigkeit mit unserem Programm." />
+        <meta name="keywords" content="Reaktion,Reaktionstest,Reflextester,Reflextest,testen der Reaktion" />
+        <meta name="robots" content="index, follow, noarchive" />           
+
+        <!-- Das hier brauchst Du nur, wenn Du eine extra css Datei angelegt hast, die den Stil deines Textes aendert. -->
+        <link rel="stylesheet" type="text/css" href="../css/styles.css"> 
+        
+        <!-- <script type="text/javascript" src="../css/jquery.js"></script> -->
+
+        <!--Ab hier beginnt der Javascript teil, den kann man seperat aus einer Datei nehmen, wie hier drueber zu sehen,
+        oder man schreibt es in die html Datei hinein, wie hier unten zu sehen.-->
+        <script type="text/javascript">
+
+        // Hier ist das Kommentar anders, da wir in einem Skript sind. Also nicht mehr HTML, sondern Javascript.
+        // Hier werden die Variablen fuer den folgenden Code definiert.
+        var startZeit=new Date();
+        var endZeit=new Date();
+        var farbenwechselGestartet=false;
+        var startPressed=false;
+        var maxWait=20;
+        var timerID;
+
+        // Das getElementById sorgt dafuer, dass das Element in " " herausgesucht und addressiert wird. In diesem
+        // Falle also das Element mit der Id reaktionsBox
+
+        function startTest()
+        {
+            document.getElementById("reaktionsBox").style.backgroundColor = "#008000";
+            farbenwechselGestartet=true;
+            startZeit=new Date();
+        }
+
+        // Das hier ist die Funktion, die die Reaktionszeiten bewertet.
+        // Ich finde sie sehr, sehr schnell.
+        function remark(responseTime)
+        {
+            var responseString="";
+            if (responseTime > 0 && responseTime <0.01)
+                responseString="Super Reaktionzeit!"
+            if (responseTime >.01 && responseTime <.05 )
+                responseString="Klasse Reaktionszeit!";
+            if (responseTime >= 0.05 && responseTime <.10)
+                responseString="Sehr gute Reaktion!";
+            if (responseTime >= 0.10 && responseTime < 0.20)
+                responseString="Gutes Ergebnis!";
+            if (responseTime >=0.20 && responseTime < 0.30)
+                responseString="Sie können sich noch steigern!";
+            if (responseTime >=0.30 && responseTime < 0.60)
+                responseString="Üben Sie immer weiter!";
+            if (responseTime >=0.60 && responseTime < 1)
+                responseString="Üben, üben, üben...";
+            if (responseTime >=1)
+                responseString="Üben, üben, üben...";
+            return responseString;
+        }
+
+        function stopTest()
+        {
+            if(farbenwechselGestartet)
+            {
+                endZeit=new Date();
+                var responseTime=(endZeit.getTime()-startZeit.getTime())/1000;
+                document.getElementById("reaktionsBox").style.backgroundColor="red";	// Wer lieber Weinrot mag: #8b0000
+                document.getElementById("reaktionsBoxErgebnis").innerHTML = ("<b>Ergebnis</b>: Die Reaktionszeit ist: " + responseTime + " Sekunden. " + remark(responseTime)); 
+                startPressed=false;
+                farbenwechselGestartet=false;
+            }
+            else
+            {
+                if (!startPressed)
+                {
+                    alert("Bitte zuerst den Start-Button drücken.");    // Falls der Knopf Stop gedrueckt wurde, aber noch nicht Start gedrueckt wurde
+                                                                        // erscheint diese Meldung.
+                }
+                else
+                {       
+                    clearTimeout(timerID);                              // Falls stop gedrueckt wurde, bevor der Farbwechsel statt gefunden hat.
+                    startPressed=false;             
+                    alert("Sie haben zu früh gedrückt.");               // Alert ist der Hinweis, der dann im Browser erscheint.
+                }               
+            }
+        }
+
+        // Hier setzt man weitere Variablen:
+        var randMULTIPLIER=0x015a4e35;
+        var randINCREMENT=1;
+        var today=new Date();
+        var randSeed=today.getSeconds();
+
+        function randNumber()   //Generiert eine Zufallszahl
+        {
+            randSeed = (randMULTIPLIER * randSeed + randINCREMENT) % (1 << 31);
+            return((randSeed >> 15) & 0x7fff) / 32767;
+        }
+
+        function startit()
+        {
+            if(startPressed)
+            {
+                alert("Der Test ist schon gestartet. Drücken Sie auf den Stop-Button.");   
+                return;
+            }
+            else
+            {
+                document.getElementById("reaktionsBoxErgebnis").innerHTML = "&nbsp;"; // Non breaking space
+                startPressed=true; 
+                timerID=setTimeout('startTest()', 6000*randNumber());                 // Setzt den Timer, start ist das Druecken von Start
+            }                                                                         // und das Ende wird ueber die Zufallszahl festgelegt.
+        } 
+ 
+        // Hier die Funktion, die die Reihen zur Ergebnistabelle hinzufügt:
+        function insert_Row() 
+            {
+            var responseTime=(endZeit.getTime()-startZeit.getTime())/1000;      // Setze fuer die Funktion die Definition fuer die Reaktionszeit.
+
+                if (responseTime>0)         // Hier schaut die Funktion, ob ueberhaupt schon start gedrueckt wurde, also die Zeit laeuft.
+                { 
+                var x=document.getElementById('Ergebnistabelle').insertRow(-1); // -1 traegt es unten drunter ein
+                var y = x.insertCell(0);    // hier fuegt man der Zeile x eine neue Spalte an Position 0 zu
+                var z = x.insertCell(1);    // hier ist die zweite Spalte eingefuegt
+                var teilnehmer=document.getElementById("Teilnehmername").value; 
+                // Oben drueber nimmt es aus dem Feld Teilnehmername den Wert, 
+                // also den Namen heraus und setzt ihn hier darunter als Wert fuer die erste Spalte:
+                    y.innerHTML=teilnehmer
+                    z.innerHTML= responseTime + "s" // Die zweite Spalte wird mit den Zeiten gefuellt.
+                }
+                else
+                {
+                    alert("Sie haben noch kein Ergebnis zum Eintragen!")    //Wenn das Programm noch nicht gemessen hat, gibt es auch nichts,
+                                                                            // was in die Tabelle eingetragen werden kann.
+                }
+            }
+        </script> 
+        <!-- Hier wurde das Javascript im head beendet und es folgt wieder HTML Code.-->
+    </head>
+
+        <!--Im Body ist das, was man dann auf der Website sehen soll.-->
+    <body> 
+      
+
+        <!-- Hier beginnt die Ueberschrift und der Text, den man sieht.-->
+        <section id="title" class="teaserBox">
+            <h1>Testen Sie Ihre Reaktion</h1>
+            <p>Hier können Sie Ihre Reaktionsgeschwindigkeit messen. 
+                <br> Starten Sie den Test mit einem Klick auf den Button &#8222;Start&#8220;.</p>
+            <p>Sobald die rote Fläche auf grün wechselt, klicken Sie schnellstmöglich auf den Button &#8222;Stop&#8220;.</p>
+        </section>
+        
+        <div class="reaktionsBox" id="reaktionsBox" style="height: 200px; width: 400px; border: 2px solid rgb(0, 0, 0); padding: 20px 10px 0px; 
+          font-size: 15px, text-align center; background-color: red;">
+                <div class="reaktionsBoxButton" style="text-align: center;"> <!--Das hier sorgt fuer die mittige Ausrichtung.-->
+                    <p> <br> <br> <br> <!--Zugegeben, eine etwas improvisierte Loesung, das rueckt den Text von oben in die Mitte.-->
+                        <input onclick="startit()" value="   Start   " type="button" class="reaktionsBoxButton"> 
+                        <!-- <br> wuerde die beiden Knoepfe uebereinanderbringen, statt sie daneben zu haben.--> 
+                        <input onclick="stopTest()" value="   Stop   " type="button" class="reaktionsBoxButton">
+                    </p>
+                </div>
+        </div>
+
+        <br>
+
+        <div id="reaktionsBoxErgebnis" style="margin-bottom:10px" class="text100rot">&nbsp; </div>
+
+
+        <!-- Das hier ist das Feld fuer die Namenseintragung -->
+        <input id="Teilnehmername" style="width: 300px" type="text" name="name" 
+        placeholder="Hier können Sie Ihren Namen eintragen."> <!--Der placeholder ist der Platzhalter, also das, was vor
+        der Texteingabe im Textfeld steht. Damit weiss der Benutzer, was mit dem Feld zu machen ist.-->
+
+        <!-- Und das hier ist der Knopf, der die Funktion insert_Row anwirft um alles einzutragen. -->
+        <div class="box" style="width: 330px">
+            <input type="button" onclick="insert_Row()" value="Ergebnis in die Tabelle eintragen.">  
+            <br>
+            <br>
+        </div>
+
+        <!-- Hier gibts die ersten Eintragungen der Ergebnistabelle, die habe ich vorgegeben. -->
+        <table id="Ergebnistabelle" border="5"> <!--Boarder gibt die Randdicke der Tabelle an-->
+            <tr>                                <!--tr heisst table row-->
+                <td>Name</td>                   
+                <td>Zeit</td>
+            </tr>
+            <!-- Hier habe ich ein einfaches Beispiel rein geschrieben, damit der Benutzer sieht,
+            was die Tabelle fuer einen Sinn hat.-->
+            <tr>
+                <td>Schlafmütze</td>
+                <td>3.000s</td>
+            </tr>
+        </table>
+        <br> 
+        <div>
+        <!-- Hier noch der Abschlusstext -->
+            <p>Bitte beachten Sie:
+                <br> Der Test dient der Unterhaltung und hält keiner wissenschaftlicher Überprüfung stand.
+                <br>Die gemessene Reaktionsgeschwindigkeit wird von mehreren zusätzlichen Faktoren,
+                <br> wie Darstellung der Fläche im jeweiligen Browser oder der Internetverbindung, beeinflusst.
+            </p>
+        </div> 
+    </body>
+</html>
